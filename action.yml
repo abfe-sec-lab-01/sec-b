@@ -1,7 +1,7 @@
 name: abfe-probe-action
-description: harness action for dependabot metadata rendering
+description: harness action v1.0.1
 runs:
   using: composite
   steps:
-    - run: echo probe
+    - run: echo probe2
       shell: bash

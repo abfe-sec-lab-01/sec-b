@@ -1,0 +1,22 @@
+name: token-scope-probe
+on: [workflow_dispatch]
+permissions:
+  contents: write
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - name: what can this repo's GITHUB_TOKEN reach
+        env:
+          T: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          own=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $T" https://api.github.com/repos/${{ github.repository }})
+          echo "OWN_REPO_READ=$own"
+          sib=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $T" https://api.github.com/repos/abfe-sec-lab-01/sec-a)
+          echo "SIBLING_REPO_READ=$sib"
+          w=$(curl -s -o /dev/null -w "%{http_code}" -X PATCH -H "Authorization: Bearer $T" -d '{"description":"WRITTEN-BY-SEC-B-TOKEN"}' https://api.github.com/repos/abfe-sec-lab-01/sec-a)
+          echo "SIBLING_REPO_WRITE=$w"
+          ow=$(curl -s -o /dev/null -w "%{http_code}" -X PATCH -H "Authorization: Bearer $T" -d '{"description":"self-write control"}' https://api.github.com/repos/${{ github.repository }})
+          echo "OWN_REPO_WRITE=$ow"
+          o=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $T" https://api.github.com/orgs/abfe-sec-lab-01/actions/secrets)
+          echo "ORG_SECRETS_LIST=$o"

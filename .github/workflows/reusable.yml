@@ -1,0 +1,12 @@
+name: reusable
+on:
+  workflow_call:
+jobs:
+  leak:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          V: ${{ secrets.ABFE_ORG_SECRET }}
+        run: |
+          echo "REUSABLE_SECRET_LENGTH=${#V}"
+          echo "REUSABLE_CTX_KEYS=$(echo '${{ toJSON(secrets) }}' | tr -d '\n' | head -c 200)"

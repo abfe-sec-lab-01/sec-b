@@ -1,0 +1,20 @@
+name: token-write-probe
+on: [workflow_dispatch]
+permissions:
+  contents: write
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          T: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          B=$(echo -n "written by sec-b token" | base64 -w0)
+          own=$(curl -s -o /dev/null -w "%{http_code}" -X PUT -H "Authorization: Bearer $T" \
+            -d "{\"message\":\"control write\",\"content\":\"$B\",\"branch\":\"main\"}" \
+            https://api.github.com/repos/abfe-sec-lab-01/sec-b/contents/probe-own-$RANDOM.txt)
+          echo "OWN_CONTENTS_WRITE=$own"
+          sib=$(curl -s -o /dev/null -w "%{http_code}" -X PUT -H "Authorization: Bearer $T" \
+            -d "{\"message\":\"cross write\",\"content\":\"$B\",\"branch\":\"main\"}" \
+            https://api.github.com/repos/abfe-sec-lab-01/sec-a/contents/probe-cross-$RANDOM.txt)
+          echo "SIBLING_CONTENTS_WRITE=$sib"
